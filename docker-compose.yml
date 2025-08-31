@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  custom-sbs:
+    build:
+      context: ./Cell-Custom-Spring-Boot-Service/digital.alf.customsbs
+    ports:
+      - "8080:8080"
