@@ -28,12 +28,13 @@ services:
     ports:
       - "8081:8081"
     environment:
+      ME_CONFIG_MONGODB_AUTH_PASSWORD:
+      ME_CONFIG_MONGODB_AUTH_USERNAME:
+      ME_CONFIG_MONGODB_AUTH_DATABASE: 'myappdb'
       ME_CONFIG_MONGODB_SERVER: mongodb
       ME_CONFIG_MONGODB_PORT: 27017
-      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
     depends_on:
-      mongodb:
-        condition: service_healthy
+      - mongodb
 
 volumes:
   mongodb_dev_data:
