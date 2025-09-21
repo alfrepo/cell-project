@@ -1,0 +1,20 @@
+# docker-compose.dev.yml
+version: '3.8'
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: myapp-mongodb
+    networks:
+      - myapp-network
+    # Base environment variables (can be overridden)
+    ports:
+      - "27017:27017" # Expose for easy local access
+    environment:
+      MONGO_INITDB_DATABASE: myappdb
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongodb_dev_data:/data/db # Dev-specific volume, perhaps not as robust
+
+volumes:
+  mongodb_dev_data:
