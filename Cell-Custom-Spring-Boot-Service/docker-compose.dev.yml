@@ -1,15 +1,76 @@
-# docker-compose.dev.yml
 services:
+  # Services from the Kestra configuration
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: kestra
+      POSTGRES_USER: kestra
+      POSTGRES_PASSWORD: kestra
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - kestra
+
+  # orchestration
+  # localhost:8080
+  # login: admin@kestra.io pass: Admin1234
+  kestra:
+    image: kestra/kestra:latest
+    pull_policy: always
+    user: "root"
+    command: server standalone --worker-thread=128
+    volumes:
+      - kestra_data:/app/storage
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/kestra-wd:/tmp/kestra-wd:rw
+    environment:
+      KESTRA_CONFIGURATION: |
+        datasources:
+          postgres:
+            url: jdbc:postgresql://postgres:5432/kestra
+            driverClassName: org.postgresql.Driver
+            username: kestra
+            password: kestra
+        kestra:
+          server:
+            basic-auth:
+              enabled: true
+              username: admin@kestra.io
+              password: Admin1234
+          repository:
+            type: postgres
+          storage:
+            type: local
+            local:
+              base-path: "/app/storage"
+          queue:
+            type: postgres
+          tasks:
+            tmp-dir:
+              path: /tmp/kestra-wd/tmp
+        micronaut:
+          application:
+            name: kestra
+          server:
+            port: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - kestra
+
+  # Services from the docker-compose.dev.yml configuration
   mongodb:
     image: mongo:latest
-    container_name: myapp-mongodb
     networks:
       - myapp-network
-    # Base environment variables (can be overridden)
     ports:
       - "27017:27017" # Expose for easy local access
     environment:
       MONGO_INITDB_DATABASE: myappdb
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
     volumes:
       - mongodb_dev_data:/data/db # Dev-specific volume, perhaps not as robust
       - ./db-init:/docker-entrypoint-initdb.d
@@ -20,9 +81,10 @@ services:
       retries: 5
       start_period: 15s
 
+  # mongo gui
+  #   localhost:8081
   mongo-express:
     image: mongo-express
-    container_name: myapp-mongo-express
     networks:
       - myapp-network
     ports:
@@ -37,4 +99,18 @@ services:
       - mongodb
 
 volumes:
+  # Volumes from the Kestra configuration
+  postgres_data:
+    driver: local
+  kestra_data:
+    driver: local
+  # Volumes from the docker-compose.dev.yml configuration
   mongodb_dev_data:
+
+networks:
+  # Networks from the Kestra configuration
+  kestra:
+    driver: bridge
+  # Networks from the docker-compose.dev.yml configuration
+  myapp-network:
+    driver: bridge
