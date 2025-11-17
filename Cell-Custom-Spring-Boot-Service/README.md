@@ -5,7 +5,7 @@
 Before starting the application, the following command is required:
 
 ```bash
-podman-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+podman-compose -f docker-compose.yml -f docker-compose.mongo.dev.yml up -d
 ```
 
 ## MongoDB Management (Development)

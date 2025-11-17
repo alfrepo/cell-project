@@ -60,44 +60,6 @@ services:
     networks:
       - kestra
 
-  # Services from the docker-compose.dev.yml configuration
-  mongodb:
-    image: mongo:latest
-    networks:
-      - myapp-network
-    ports:
-      - "27017:27017" # Expose for easy local access
-    environment:
-      MONGO_INITDB_DATABASE: myappdb
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin
-    volumes:
-      - mongodb_dev_data:/data/db # Dev-specific volume, perhaps not as robust
-      - ./db-init:/docker-entrypoint-initdb.d
-    healthcheck:
-      test: ["CMD-SHELL", "mongosh --host 127.0.0.1 --port 27017 --eval 'db.adminCommand(\"ping\").ok' --quiet"]
-      interval: 5s
-      timeout: 2s
-      retries: 5
-      start_period: 15s
-
-  # mongo gui
-  #   localhost:8081
-  mongo-express:
-    image: mongo-express
-    networks:
-      - myapp-network
-    ports:
-      - "8081:8081"
-    environment:
-      ME_CONFIG_MONGODB_AUTH_PASSWORD:
-      ME_CONFIG_MONGODB_AUTH_USERNAME:
-      ME_CONFIG_MONGODB_AUTH_DATABASE: 'myappdb'
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_PORT: 27017
-    depends_on:
-      - mongodb
-
 volumes:
   # Volumes from the Kestra configuration
   postgres_data:
