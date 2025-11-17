@@ -52,9 +52,9 @@ services:
           application:
             name: kestra
           server:
-            port: 8080
+            port: 8082
     ports:
-      - "8080:8080"
+      - "8082:8082"
     depends_on:
       - postgres
     networks:
