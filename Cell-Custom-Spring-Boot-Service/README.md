@@ -14,5 +14,5 @@ podman.up.kestra.bat
 
 In the development environment, you can manage the MongoDB instance using Mongo-Express, a web-based administration interface.
 
-*   **Access Mongo-Express:** Open your web browser and navigate to `http://localhost:8081/db/myappdb/`.
+*   **Access Mongo-Express:** Open your web browser and navigate to `http[README.MD](..%2FREADME.MD)://localhost:8081/db/myappdb/`.
 *   **Connecting to the Database:** Since authentication is disabled in the development setup, Mongo-Express should automatically connect to the `myappdb` database running in the `mongodb` service. You should see your `employees` collection and its data.

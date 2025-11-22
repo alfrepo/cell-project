@@ -1,0 +1,59 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: abac-enroll-restriction-time-bound
+  annotations:
+    policies.kyverno.io/description: |
+      Restricts the 'ENTER' operation on 'Facility' resources labeled 'location: 
+      "production-room"' to users possessing the 'training-vde-available-group' attribute. 
+      This restriction is only enforced during a critical, 
+      specific time window (2025-10-20T08:00:00Z to 2025-10-20T09:00:00Z) for members of the 'employee-group'.
+spec:
+  validationFailureAction: Enforce # Immediately block request
+  background: false
+  rules:
+    - name: deny-enroll-without-training-vde
+      match:
+        # 1. Subject Attribute: The group must be 'employee-group'
+        subjects:
+          - kind: Group
+            name: employee-group
+
+        # 2. Resource Attribute: The target resource must be one of the locations
+        resources:
+          kinds:
+            - Facility # Example: A Custom Resource for physical facilities
+          selector:
+            matchLabels:
+              location: "production-room"
+              # NOTE: A second rule or a more complex match for 'storage-room' would have to follow here.
+
+        # 3. Operation Attribute: The operation 'Enroll' (assumed as UPDATE)
+        operations:
+          - ENTER
+          - EXIT
+
+      # TEMPORAL PRECONDITION: The rule is ONLY executed if the time is within the window.
+      preconditions:
+        all:
+          # Define the 1-hour window
+          - key: "{{ time_between('{{ time_now_utc() }}', '2025-10-20T08:00:00Z', '2025-10-20T09:00:00Z') }}"
+            operator: Equals
+            value: true
+
+      # The ABAC logic (is only executed if the time condition is TRUE)
+      deny:
+        conditions:
+          all:
+            # Condition 1 (Positive Group): User is in the main group (Redundancy/Clarity)
+            - key: employee-group
+              operator: AnyIn
+              value: "{{ request.userInfo.groups }}"
+
+            # Condition 2 (Negative Attribute Check): The training attribute is missing
+            - key: "training-vde-available-group"
+              operator: AnyNotIn
+              value: "{{ request.userInfo.groups }}"
+
+      validate:
+        message: "ATTENTION: The 'Enroll' operation is only allowed for qualified personnel ('training-vde-available') during the critical time window (08:00-09:00 UTC)."
