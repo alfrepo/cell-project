@@ -1,0 +1,10 @@
+# userinfo_chloe_davis.yaml
+apiVersion: cli.kyverno.io/v1alpha1
+kind: UserInfo
+metadata:
+  name: chloe-davis
+userInfo:
+  username: Chloe Davis
+  uid: CD-8877
+  groups:
+    - employee-group

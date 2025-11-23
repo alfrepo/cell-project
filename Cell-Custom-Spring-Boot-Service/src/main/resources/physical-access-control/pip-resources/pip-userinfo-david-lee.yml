@@ -1,0 +1,11 @@
+# userinfo_david_lee.yaml
+apiVersion: cli.kyverno.io/v1alpha1
+kind: UserInfo
+metadata:
+  name: david-lee
+userInfo:
+  username: David Lee
+  uid: DL-1020
+  groups:
+    - employee-group
+    - training-vde-available-group

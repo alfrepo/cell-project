@@ -1,0 +1,7 @@
+# target-facility-resource.yaml
+apiVersion: v1 # Use a dummy API version if your real one is a CRD
+kind: Facility # Must match the kind 'Facility' in your policy
+metadata:
+  name: main-entrance-door
+  labels:
+    location: "production-room" # Must match the label selector

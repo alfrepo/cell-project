@@ -1,0 +1,11 @@
+# userinfo_anya_sharma.yaml
+apiVersion: cli.kyverno.io/v1alpha1
+kind: UserInfo
+metadata:
+  name: anya-sharma
+userInfo:
+  username: Anya Sharma # Used for request.userInfo.username
+  uid: ES-4902          # Used for request.userInfo.uid
+  groups:               # Used for request.userInfo.groups
+    - employee-group
+    - training-vde-available-group

@@ -1,0 +1,10 @@
+# userinfo_ben_carter.yaml
+apiVersion: cli.kyverno.io/v1alpha1
+kind: UserInfo
+metadata:
+  name: ben-carter
+userInfo:
+  username: Ben Carter
+  uid: BC-3115
+  groups:
+    - employee-group # The required 'training-vde-available-group' is intentionally omitted

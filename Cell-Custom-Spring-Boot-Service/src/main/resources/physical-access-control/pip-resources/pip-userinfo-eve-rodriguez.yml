@@ -1,0 +1,10 @@
+# userinfo_eve_rodriguez.yaml
+apiVersion: cli.kyverno.io/v1alpha1
+kind: UserInfo
+metadata:
+  name: eve-rodriguez
+userInfo:
+  username: Eve Rodriguez
+  uid: ER-5566
+  groups:
+    - employee-group
