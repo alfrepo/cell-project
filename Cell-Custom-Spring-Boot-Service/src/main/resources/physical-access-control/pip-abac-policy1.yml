@@ -21,6 +21,13 @@ spec:
           kinds:
             - Facility # Example: A Custom Resource for physical facilities
 
-
       validate:
-        message: "ATTENTION: The 'Enroll' operation is only allowed for qualified personnel ('training-vde-available') during the critical time window (08:00-09:00 UTC)."
+        message: "ATTENTION: The 'UPDATE' operation is only allowed for qualified personnel ('training-vde-available') during the critical time window (08:00-09:00 UTC)."
+        deny: # Deny the request UNLESS all required conditions are met
+          conditions:
+            # Deny if EITHER of these is true (i.e., not allowed):
+            any:
+              # Condition B: Deny if the user is NOT in the required group
+              - key: training-vde-available-group
+                operator: NotIn
+                value: "{{ request.userInfo.groups }}"
