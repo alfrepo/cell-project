@@ -48,4 +48,36 @@ public class AclController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    /**
+     * NEW: Endpoint to generate ACL using dynamic kyverno-cli evaluation.
+     * Evaluates users from pip-users/ directory against the policy.
+     *
+     * @return ACL entries in JSON format
+     */
+    @GetMapping("/generate/dynamic")
+    public ResponseEntity<List<AclEntry>> generateAclDynamic() {
+        try {
+            List<AclEntry> aclEntries = policyToAclStrategy.convertPolicyToAclWithDynamicEvaluation();
+            return ResponseEntity.ok(aclEntries);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * NEW: Endpoint to get formatted ACL output using dynamic evaluation.
+     *
+     * @return Formatted ACL string
+     */
+    @GetMapping("/generate/dynamic/formatted")
+    public ResponseEntity<String> generateFormattedAclDynamic() {
+        try {
+            List<AclEntry> aclEntries = policyToAclStrategy.convertPolicyToAclWithDynamicEvaluation();
+            String formatted = policyToAclStrategy.formatAclOutput(aclEntries);
+            return ResponseEntity.ok(formatted);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 }

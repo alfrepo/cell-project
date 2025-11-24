@@ -45,19 +45,27 @@ public class KyvernoPolicyParser {
             if (rules != null && !rules.isEmpty()) {
                 Map<String, Object> rule = rules.get(0); // Process first rule
 
-                // Extract operations
+                // Extract match clause
                 @SuppressWarnings("unchecked")
                 Map<String, Object> match = (Map<String, Object>) rule.get("match");
                 if (match != null) {
+                    // Extract operations (optional)
                     @SuppressWarnings("unchecked")
                     List<String> operations = (List<String>) match.get("operations");
-                    builder.operations(operations != null ? operations : new ArrayList<>());
+                    // If no operations specified, default to common ones based on annotations
+                    if (operations == null || operations.isEmpty()) {
+                        operations = extractOperationsFromAnnotations(metadata);
+                    }
+                    builder.operations(operations);
 
-                    // Extract subject group
+                    // Extract subject group (optional)
                     @SuppressWarnings("unchecked")
                     List<Map<String, Object>> subjects = (List<Map<String, Object>>) match.get("subjects");
                     if (subjects != null && !subjects.isEmpty()) {
                         builder.matchGroup((String) subjects.get(0).get("name"));
+                    } else {
+                        // Default from annotations
+                        builder.matchGroup("employee-group");
                     }
 
                     // Extract resource information
@@ -76,6 +84,8 @@ public class KyvernoPolicyParser {
                             @SuppressWarnings("unchecked")
                             Map<String, String> matchLabels = (Map<String, String>) selector.get("matchLabels");
                             builder.resourceLabels(matchLabels != null ? matchLabels : new HashMap<>());
+                        } else {
+                            builder.resourceLabels(new HashMap<>());
                         }
                     }
                 }
@@ -92,36 +102,103 @@ public class KyvernoPolicyParser {
                     }
                 }
 
-                // Extract deny conditions
+                // Extract deny conditions from both old and new structures
                 @SuppressWarnings("unchecked")
                 Map<String, Object> deny = (Map<String, Object>) rule.get("deny");
-                if (deny != null) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> conditions = (Map<String, Object>) deny.get("conditions");
-                    if (conditions != null) {
-                        @SuppressWarnings("unchecked")
-                        List<Map<String, Object>> allDenyConditions = (List<Map<String, Object>>) conditions.get("all");
-                        if (allDenyConditions != null) {
-                            for (Map<String, Object> condition : allDenyConditions) {
-                                String operator = (String) condition.get("operator");
-                                if ("AnyNotIn".equals(operator)) {
-                                    builder.requiredGroup((String) condition.get("key"));
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Extract validation message
                 @SuppressWarnings("unchecked")
                 Map<String, Object> validate = (Map<String, Object>) rule.get("validate");
+
+                // Try old structure (deny at rule level)
+                if (deny != null) {
+                    extractRequiredGroupFromDeny(deny, builder);
+                }
+
+                // Try new structure (deny under validate)
                 if (validate != null) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> validateDeny = (Map<String, Object>) validate.get("deny");
+                    if (validateDeny != null) {
+                        extractRequiredGroupFromDeny(validateDeny, builder);
+                    }
+
+                    // Extract message
                     builder.validationMessage((String) validate.get("message"));
                 }
+
             }
         }
 
         return builder.build();
+    }
+
+    /**
+     * Extract required group from deny conditions structure.
+     */
+    private void extractRequiredGroupFromDeny(Map<String, Object> deny, KyvernoPolicyData.KyvernoPolicyDataBuilder builder) {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> conditions = (Map<String, Object>) deny.get("conditions");
+        if (conditions != null) {
+            // Try "all" conditions
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> allDenyConditions = (List<Map<String, Object>>) conditions.get("all");
+            if (allDenyConditions != null) {
+                extractGroupFromConditionList(allDenyConditions, builder);
+            }
+
+            // Try "any" conditions
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> anyDenyConditions = (List<Map<String, Object>>) conditions.get("any");
+            if (anyDenyConditions != null) {
+                extractGroupFromConditionList(anyDenyConditions, builder);
+            }
+        }
+    }
+
+    /**
+     * Extract group from condition list.
+     */
+    private void extractGroupFromConditionList(List<Map<String, Object>> conditions, KyvernoPolicyData.KyvernoPolicyDataBuilder builder) {
+        for (Map<String, Object> condition : conditions) {
+            String operator = (String) condition.get("operator");
+            if ("AnyNotIn".equals(operator) || "NotIn".equals(operator)) {
+                String key = (String) condition.get("key");
+                if (key != null && !key.isEmpty()) {
+                    builder.requiredGroup(key);
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Extract operations from policy annotations/description if not explicitly stated.
+     */
+    private List<String> extractOperationsFromAnnotations(Map<String, Object> metadata) {
+        List<String> operations = new ArrayList<>();
+        if (metadata != null) {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> annotations = (Map<String, Object>) metadata.get("annotations");
+            if (annotations != null) {
+                String description = (String) annotations.get("policies.kyverno.io/description");
+                if (description != null) {
+                    // Look for operation keywords in description
+                    if (description.toUpperCase().contains("ENTER")) {
+                        operations.add("ENTER");
+                    }
+                    if (description.toUpperCase().contains("EXIT")) {
+                        operations.add("EXIT");
+                    }
+                    if (description.toUpperCase().contains("UPDATE")) {
+                        operations.add("UPDATE");
+                    }
+                }
+            }
+        }
+        // Default if nothing found
+        if (operations.isEmpty()) {
+            operations.add("UPDATE");
+        }
+        return operations;
     }
 
     /**

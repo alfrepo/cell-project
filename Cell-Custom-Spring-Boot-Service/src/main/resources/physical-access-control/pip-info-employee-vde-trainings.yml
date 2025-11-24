@@ -1,0 +1,26 @@
+employees:
+  - name: Anya Sharma
+    id: ES-4902
+    groups:
+      employee-group: true
+      training-vde-available-group: true
+  - name: Ben Carter
+    id: BC-3115
+    groups:
+      employee-group: true
+      training-vde-available-group: false
+  - name: Chloe Davis
+    id: CD-8877
+    groups:
+      employee-group: true
+      training-vde-available-group: false
+  - name: David Lee
+    id: DL-1020
+    groups:
+      employee-group: true
+      training-vde-available-group: true
+  - name: Eve Rodriguez
+    id: ER-5566
+    groups:
+      employee-group: true
+      training-vde-available-group: false

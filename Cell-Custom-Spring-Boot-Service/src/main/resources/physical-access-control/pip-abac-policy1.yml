@@ -21,6 +21,14 @@ spec:
           kinds:
             - Facility # Example: A Custom Resource for physical facilities
 
+      # TEMPORAL PRECONDITION: The rule is ONLY executed if the time is within the single, absolute window.
+      preconditions:
+        all:
+          # Use time_between() for a single, absolute date and time range.
+          - key: "{{ time_between('{{ request.time.admissionTime }}', '2024-10-20T08:00:00Z', '2026-10-20T19:00:00Z') }}"
+            operator: Equals
+            value: true
+
       validate:
         message: "ATTENTION: The 'UPDATE' operation is only allowed for qualified personnel ('training-vde-available') during the critical time window (08:00-09:00 UTC)."
         deny: # Deny the request UNLESS all required conditions are met

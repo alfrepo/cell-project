@@ -91,6 +91,54 @@ public class PolicyToAclStrategy {
     }
 
     /**
+     * NEW: Dynamic evaluation using kyverno-cli.
+     *
+     * Generates ACL entries by evaluating users from pip-users/ directory against the policy
+     * using kyverno-cli. Only users who pass the evaluation (results.result != "fail") are included.
+     *
+     * Algorithm:
+     * 1. Parse Kyverno policy to extract operations and metadata
+     * 2. For each user in resources/physical-access-control/pip-users/:
+     *    - Execute: kyverno apply <policy> --resource <resource> --userinfo <user> --set request.operation=<op>,request.time.admissionTime=<time>
+     *    - Parse JSON output (ClusterReport)
+     *    - If no "fail" results, add user to ACL
+     * 3. Generate ACL entries for qualified users
+     *
+     * @param policyPath Path to policy YAML (e.g., "physical-access-control/pip-abac-policy1.yml")
+     * @param resourcePath Path to resource YAML (e.g., "physical-access-control/pip-resources/pip-resource-room.yml")
+     * @param admissionTime Time for evaluation (e.g., "2025-10-20T08:30:00Z")
+     * @return List of ACL entries for users who passed kyverno evaluation
+     * @throws IOException if execution fails
+     */
+    public List<AclEntry> convertPolicyToAclWithDynamicEvaluation(
+            String policyPath,
+            String resourcePath,
+            String admissionTime) throws IOException {
+
+        // Parse policy to extract operations and metadata
+        KyvernoPolicyData policyData = parseKyvernoPolicy(policyPath);
+
+        // Use dynamic evaluation with kyverno-cli
+        return aclGenerator.generateAclWithDynamicEvaluation(
+                policyData,
+                policyPath,
+                resourcePath,
+                admissionTime
+        );
+    }
+
+    /**
+     * Default dynamic evaluation with standard paths.
+     */
+    public List<AclEntry> convertPolicyToAclWithDynamicEvaluation() throws IOException {
+        return convertPolicyToAclWithDynamicEvaluation(
+                "physical-access-control/pip-abac-policy1.yml",
+                "physical-access-control/pip-resources/pip-resource-room.yml",
+                "2025-10-20T08:30:00Z"
+        );
+    }
+
+    /**
      * Formats the ACL entries as a string output.
      */
     public String formatAclOutput(List<AclEntry> aclEntries) {
