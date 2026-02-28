@@ -22,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OpaAclController {
 
+
     private final OpaPolicyToAclStrategy opaPolicyToAclStrategy;
 
     /**

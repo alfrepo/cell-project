@@ -10,6 +10,15 @@ podman.up.mongo.bat
 podman.up.kestra.bat
 ```
 
+
+## Login
+
+```
+http://localhost:8080/?continue
+Login: user
+Pass: password
+```
+
 ## MongoDB Management (Development)
 
 In the development environment, you can manage the MongoDB instance using Mongo-Express, a web-based administration interface.
