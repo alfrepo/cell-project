@@ -3,6 +3,8 @@ package digital.alf.cells.physicalacesscontrolopa.controller;
 import digital.alf.cells.physicalacesscontrolopa.OpaPolicyToAclStrategy;
 import digital.alf.cells.physicalacesscontrolopa.model.AclEntry;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OpaAclController {
 
+    private static final Logger log = LoggerFactory.getLogger(OpaAclController.class);
 
     private final OpaPolicyToAclStrategy opaPolicyToAclStrategy;
 
@@ -32,11 +35,18 @@ public class OpaAclController {
      */
     @GetMapping("/generate")
     public ResponseEntity<List<AclEntry>> generateAcl() {
+        long startMs = System.currentTimeMillis();
         try {
             List<AclEntry> aclEntries = opaPolicyToAclStrategy.convertPolicyToAcl();
             return ResponseEntity.ok(aclEntries);
         } catch (IOException e) {
             return ResponseEntity.internalServerError().build();
+        } finally {
+            long elapsedMs = System.currentTimeMillis() - startMs;
+            long minutes = elapsedMs / 60_000;
+            long seconds = (elapsedMs % 60_000) / 1_000;
+            long millis  = elapsedMs % 1_000;
+            log.info("generateAcl() completed in {}m {}s {}ms", minutes, seconds, millis);
         }
     }
 
