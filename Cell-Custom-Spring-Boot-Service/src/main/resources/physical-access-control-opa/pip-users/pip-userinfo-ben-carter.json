@@ -1,0 +1,25 @@
+{
+  "_comment": "Converted from: pip-users/pip-userinfo-ben-carter.yml (kyverno cli.kyverno.io/v1alpha1 UserInfo)",
+  "_expected_result": "allow = false  (missing training-vde-available-group)",
+  "request": {
+    "admissionTime": "2025-10-20T08:30:00Z",
+    "operation": "ENTER",
+    "resource": {
+      "apiVersion": "v1",
+      "kind": "Facility",
+      "metadata": {
+        "name": "main-entrance-door",
+        "labels": {
+          "location": "production-room"
+        }
+      }
+    },
+    "userInfo": {
+      "username": "Ben Carter",
+      "uid": "BC-3115",
+      "groups": [
+        "employee-group"
+      ]
+    }
+  }
+}

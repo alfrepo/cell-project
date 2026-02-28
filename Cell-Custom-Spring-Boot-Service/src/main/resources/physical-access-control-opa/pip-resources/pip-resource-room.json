@@ -1,0 +1,11 @@
+{
+  "_comment": "Converted from: pip-resources/pip-resource-room.yml",
+  "apiVersion": "v1",
+  "kind": "Facility",
+  "metadata": {
+    "name": "main-entrance-door",
+    "labels": {
+      "location": "production-room"
+    }
+  }
+}

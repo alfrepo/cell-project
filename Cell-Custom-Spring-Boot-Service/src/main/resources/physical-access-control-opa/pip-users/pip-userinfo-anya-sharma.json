@@ -1,0 +1,26 @@
+{
+  "_comment": "Converted from: pip-users/pip-userinfo-anya-sharma.yml (kyverno cli.kyverno.io/v1alpha1 UserInfo)",
+  "_expected_result": "allow = true  (has training-vde-available-group)",
+  "request": {
+    "admissionTime": "2025-10-20T08:30:00Z",
+    "operation": "ENTER",
+    "resource": {
+      "apiVersion": "v1",
+      "kind": "Facility",
+      "metadata": {
+        "name": "main-entrance-door",
+        "labels": {
+          "location": "production-room"
+        }
+      }
+    },
+    "userInfo": {
+      "username": "Anya Sharma",
+      "uid": "ES-4902",
+      "groups": [
+        "employee-group",
+        "training-vde-available-group"
+      ]
+    }
+  }
+}
