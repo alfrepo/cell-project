@@ -11,7 +11,6 @@ services:
       MONGO_INITDB_DATABASE: myappdb
     volumes:
       - mongodb_dev_data:/data/db # Dev-specific volume, perhaps not as robust
-      - ./db-init:/docker-entrypoint-initdb.d  # Remove this line
     healthcheck:
       test: ["CMD-SHELL", "mongosh --host 127.0.0.1 --port 27017 --eval 'db.adminCommand(\"ping\").ok' --quiet"]
       interval: 5s
